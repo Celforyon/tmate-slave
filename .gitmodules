@@ -1,0 +1,3 @@
+[submodule "tmate-slave"]
+	path = tmate-slave
+	url = https://github.com/tmate-io/tmate-slave.git

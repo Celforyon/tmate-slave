@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ "$#" -gt 0 ]; then
+	exec $@
+	exit $?
+fi
+
+mkdir -p "${TMATE_KEYS_DIR}"
+if [ -z "$(ls -A "${TMATE_KEYS_DIR}")" ]; then
+	keys_info=$(./create_keys.sh)
+
+	fingerprints=$(echo "${keys_info}"|grep -E '^MD5:'|cut -d':' -f2-|cut -d' ' -f1)
+
+	rsa=$(echo "${fingerprints}"|head -n1)
+	ecdsa=$(echo "${fingerprints}"|tail -n1)
+
+	echo 'Example of ~/.tmate.conf file'
+	echo "set -g tmate-server-host \"${TMATE_HOSTNAME}\""
+	echo "set -g tmate-server-port ${TMATE_PORT}"
+	echo "set -g tmate-server-rsa-fingerprint \"${rsa}\""
+	echo "set -g tmate-server-ecdsa-fingerprint \"${ecdsa}\""
+	echo 'set -g tmate-identity ""'
+fi
+
+./tmate-slave -k "${TMATE_KEYS_DIR}" -p "${TMATE_PORT}" -h "${TMATE_HOSTNAME:-$(hostname -s)}"
